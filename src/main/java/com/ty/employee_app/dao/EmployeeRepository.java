@@ -13,4 +13,6 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long> {
     boolean existsByEmail(String email);
 
     List<Employee> findByDepartment(String dept);
+
+    List<Employee> findByNameContainingIgnoreCase(String name);
 }
