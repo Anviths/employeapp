@@ -24,8 +24,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.everyItem;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -221,5 +220,21 @@ public class EmployeeIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[*].department",
                         everyItem(is("HR"))));
+    }
+
+
+    @Test
+    void searchEmployeesIntegrationTest() throws Exception {
+
+        createEmployee("Rahul Kumar", "rahul_search1@gmail.com", "HR");
+        createEmployee("Rahul Sharma", "rahul_search2@gmail.com", "IT");
+        createEmployee("Amit Kumar", "amit_search@gmail.com", "Finance");
+
+        mockMvc.perform(get("/api/employees/search")
+                        .param("name", "rahul"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[*].name",
+                        containsInAnyOrder("Rahul Kumar", "Rahul Sharma")));
     }
 }

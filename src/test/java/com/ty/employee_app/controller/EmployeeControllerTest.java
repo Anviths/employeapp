@@ -21,6 +21,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -95,7 +96,7 @@ public class EmployeeControllerTest {
         Mockito.when(employeeService.getAllEmployees())
                 .thenReturn(List.of(response,response2));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/employees")
+        mockMvc.perform(get("/api/employees")
                 .contentType(MediaType.APPLICATION_JSON))
 
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -127,7 +128,7 @@ public class EmployeeControllerTest {
         Mockito.when(employeeService.findEmployeeById(1L))
                 .thenReturn(response);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/employees/1")
+        mockMvc.perform(get("/api/employees/1")
                 .contentType(MediaType.APPLICATION_JSON))
 
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -206,7 +207,7 @@ public class EmployeeControllerTest {
         Mockito.when(employeeService.findEmployeeByDepartment("HR"))
                 .thenReturn(List.of(response,response2));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/employees/dept/HR")
+        mockMvc.perform(get("/api/employees/dept/HR")
                 .contentType(MediaType.APPLICATION_JSON))
 
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -226,8 +227,36 @@ public class EmployeeControllerTest {
         Mockito.when(employeeService.findEmployeeById(100l)
                 ).thenThrow(new EmployeeNotFoundException("Employee Not Found"));
 
-       mockMvc.perform( MockMvcRequestBuilders.get("/api/employees/100")
+       mockMvc.perform( get("/api/employees/100")
                .contentType(MediaType.APPLICATION_JSON))
                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+
+    @Test
+    void searchEmployeesTest() throws Exception {
+
+        EmployeeResponse emp1 = new EmployeeResponse();
+        emp1.setEmpId(1L);
+        emp1.setName("Rahul Kumar");
+        emp1.setEmail("rahul@gmail.com");
+
+        EmployeeResponse emp2 = new EmployeeResponse();
+        emp2.setEmpId(2L);
+        emp2.setName("Rahul Sharma");
+        emp2.setEmail("rahul2@gmail.com");
+
+        Mockito.when(employeeService.searchEmployeesByName("Rahul"))
+                .thenReturn(List.of(emp1, emp2));
+
+        mockMvc.perform(get("/api/employees/search")
+                        .param("name", "Rahul"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].name").value("Rahul Kumar"))
+                .andExpect(jsonPath("$[1].name").value("Rahul Sharma"));
+
+        Mockito.verify(employeeService)
+                .searchEmployeesByName("Rahul");
     }
 }
