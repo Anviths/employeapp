@@ -61,4 +61,13 @@ public class EmployeeController {
                 .status(HttpStatus.OK)
                 .body(employeeService.findEmployeeByDepartment(dept));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<EmployeeResponse>> searchEmployees(
+            @RequestParam String name) {
+
+        return ResponseEntity.ok(
+                employeeService.searchEmployeesByName(name)
+        );
+    }
 }
