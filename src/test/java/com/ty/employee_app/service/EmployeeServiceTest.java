@@ -197,4 +197,35 @@ public class EmployeeServiceTest {
         Mockito.verify(employeeRepository,Mockito.never()).save(Mockito.any(Employee.class));
 
     }
+
+    @Test
+    void searchEmployeesByNameTest() {
+
+        Employee emp1 = new Employee();
+        emp1.setEmpId(1L);
+        emp1.setName("Rahul Kumar");
+        emp1.setEmail("rahul@gmail.com");
+        emp1.setDepartment("HR");
+
+        Employee emp2 = new Employee();
+        emp2.setEmpId(2L);
+        emp2.setName("Rahul Sharma");
+        emp2.setEmail("rahul2@gmail.com");
+        emp2.setDepartment("IT");
+
+        Mockito.when(
+                employeeRepository.findByNameContainingIgnoreCase("rahul")
+        ).thenReturn(List.of(emp1, emp2));
+
+        List<EmployeeResponse> response =
+                employeeService.searchEmployeesByName("rahul");
+
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(2, response.size());
+        Assertions.assertEquals("Rahul Kumar", response.get(0).getName());
+        Assertions.assertEquals("Rahul Sharma", response.get(1).getName());
+
+        Mockito.verify(employeeRepository)
+                .findByNameContainingIgnoreCase("rahul");
+    }
 }

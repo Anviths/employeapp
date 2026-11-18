@@ -75,4 +75,13 @@ public class EmployeeService {
                 .map(emp-> new EmployeeResponse(emp))
                 .toList();
     }
+
+    public List<EmployeeResponse> searchEmployeesByName(String name) {
+
+        return employeeRepository
+                .findByNameContainingIgnoreCase(name)
+                .stream()
+                .map(EmployeeResponse::new)
+                .toList();
+    }
 }
