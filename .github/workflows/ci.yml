@@ -3,13 +3,28 @@ name: Employee App CI
 
 on:
   push:
-    branches: [master, develop]
+    branches: [ "master", "develop" ]
   pull_request:
-    branches: [master, develop]
+    branches: [ "master", "develop" ]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: employee_test_db
+          POSTGRES_USER: employee_user
+          POSTGRES_PASSWORD: local_dev_password
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U employee_user -d employee_test_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout source code
@@ -22,5 +37,5 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Build and run tests
-        run: mvn -B clean verify
+      - name: Run Maven tests
+        run: mvn clean verify
